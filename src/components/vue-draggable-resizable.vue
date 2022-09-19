@@ -10,7 +10,6 @@
     }, className]"
     @mousedown="elementMouseDown"
     @touchstart="elementTouchDown"
-    @contextmenu="onContextMenu"
   >
     <div
       v-for="handle in actualHandles"
@@ -123,7 +122,7 @@ export default {
     },
     w: {
       type: [Number, String],
-      default: 200,
+      default: 300,
       validator: (val) => {
         if (typeof val === 'number') {
           return val > 0
@@ -133,7 +132,7 @@ export default {
     },
     h: {
       type: [Number, String],
-      default: 200,
+      default: 300,
       validator: (val) => {
         if (typeof val === 'number') {
           return val > 0
@@ -162,11 +161,11 @@ export default {
       validator: (val) => val >= 0
     },
     x: {
-      type: Number,
+      type: [Number, String],
       default: 0
     },
     y: {
-      type: Number,
+      type: [Number, String],
       default: 0
     },
     z: {
@@ -252,6 +251,11 @@ export default {
           switch: true
         }
       }
+    },
+    // 单位类型
+    unitType: {
+      type: String,
+      default: 'px'
     }
   },
 
@@ -311,10 +315,8 @@ export default {
 
     this.settingAttribute()
 
-    // 优化：取消选中的行为优先绑定在父节点上
-    const parentElement = this.$el.parentNode
-    addEvent(parentElement || document.documentElement, 'mousedown', this.deselect)
-    addEvent(parentElement || document.documentElement, 'touchend touchcancel', this.deselect)
+    addEvent(document.documentElement, 'mousedown', this.deselect)
+    addEvent(document.documentElement, 'touchend touchcancel', this.deselect)
 
     addEvent(window, 'resize', this.checkParentSize)
   },
@@ -330,10 +332,6 @@ export default {
   },
 
   methods: {
-    // 右键菜单
-    onContextMenu (e) {
-      this.$emit('contextmenu', e)
-    },
     // 重置边界和鼠标状态
     resetBoundsAndMouseState () {
       this.mouseClickPosition = { mouseX: 0, mouseY: 0, x: 0, y: 0, w: 0, h: 0 }
@@ -844,7 +842,6 @@ export default {
               this.bottom = this.mouseClickPosition.bottom
               this.width = this.mouseClickPosition.w
               this.height = this.mouseClickPosition.h
-              this.$emit('resizing', this.left, this.top, this.width, this.height)
             }
           }
         }
@@ -906,10 +903,9 @@ export default {
             tem['display'] = [ts, TS, bs, BS, hc, hc, ls, LS, rs, RS, vc, vc]
             tem['position'] = [t, b, t, b, t + h / 2, t + h / 2, l, r, l, r, l + w / 2, l + w / 2]
 
-            // fix：中线自动对齐，元素可能超过父元素边界的问题
             if (ts) {
               if (bln) {
-                this.top = Math.max(t - height, this.bounds.minTop)
+                this.top = t - height
                 this.bottom = this.parentHeight - this.top - height
               }
               tem.value.y[0].push(l, r, activeLeft, activeRight)
@@ -923,7 +919,7 @@ export default {
             }
             if (TS) {
               if (bln) {
-                this.top = Math.max(b - height, this.bounds.minTop)
+                this.top = b - height
                 this.bottom = this.parentHeight - this.top - height
               }
               tem.value.y[1].push(l, r, activeLeft, activeRight)
@@ -938,7 +934,7 @@ export default {
 
             if (ls) {
               if (bln) {
-                this.left = Math.max(l - width, this.bounds.minLeft)
+                this.left = l - width
                 this.right = this.parentWidth - this.left - width
               }
               tem.value.x[0].push(t, b, activeTop, activeBottom)
@@ -952,7 +948,7 @@ export default {
             }
             if (LS) {
               if (bln) {
-                this.left = Math.max(r - width, this.bounds.minLeft)
+                this.left = r - width
                 this.right = this.parentWidth - this.left - width
               }
               tem.value.x[1].push(t, b, activeTop, activeBottom)
@@ -967,14 +963,14 @@ export default {
 
             if (hc) {
               if (bln) {
-                this.top = Math.max(t + h / 2 - height / 2, this.bounds.minTop)
+                this.top = t + h / 2 - height / 2
                 this.bottom = this.parentHeight - this.top - height
               }
               tem.value.y[2].push(l, r, activeLeft, activeRight)
             }
             if (vc) {
               if (bln) {
-                this.left = Math.max(l + w / 2 - width / 2, this.bounds.minLeft)
+                this.left = l + w / 2 - width / 2
                 this.right = this.parentWidth - this.left - width
               }
               tem.value.x[2].push(t, b, activeTop, activeBottom)
@@ -1098,7 +1094,9 @@ export default {
     },
     style () {
       return {
-        transform: `translate(${this.left}px, ${this.top}px)`,
+        // transform: this.unitType==='px'?`translate(${this.left}px, ${this.top}px)`:`translate(${this.left}%, ${this.top}}%,)`,
+        left: this.unitType === 'px' ? this.left + 'px' : this.left + '%',
+        top: this.unitType === 'px' ? this.top + 'px' : this.top + '%',
         width: this.computedWidth,
         height: this.computedHeight,
         zIndex: this.zIndex,
@@ -1117,7 +1115,7 @@ export default {
           return 'auto'
         }
       }
-      return this.width + 'px'
+      return this.unitType === 'px' ? this.width + 'px' : this.width + '%'
     },
     computedHeight () {
       if (this.h === 'auto') {
@@ -1125,7 +1123,7 @@ export default {
           return 'auto'
         }
       }
-      return this.height + 'px'
+      return this.unitType === 'px' ? this.height + 'px' : this.height + '%'
     },
     resizingOnX () {
       return (Boolean(this.handle) && (this.handle.includes('l') || this.handle.includes('r')))
