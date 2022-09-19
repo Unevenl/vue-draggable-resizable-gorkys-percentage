@@ -1,7 +1,7 @@
 {
-  "name": "vue-draggable-resizable-gorkys",
-  "version": "2.4.8",
-  "author": "Maurizio Bonani <maurizio.bonani@gmail.com>",
+  "name": "vue-draggable-resizable-gorkys-percentage",
+  "version": "1.0.0",
+  "author": "uneven <unevenll@yeah.net>",
   "main": "dist/VueDraggableResizable.umd.min.js",
   "unpkg": "dist/VueDraggableResizable.umd.min.js",
   "browser": {
@@ -84,5 +84,9 @@
   ],
   "dependencies": {
     "core-js": "^2.6.11"
+  },
+  "volta": {
+    "node": "12.15.0",
+    "yarn": "1.22.19"
   }
 }
