@@ -4,7 +4,14 @@
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 [![npm](https://img.shields.io/npm/dt/vue-draggable-resizable.svg?style=flat-square)](https://www.npmjs.com/package/vue-draggable-resizable-gorkys)
 
-## 该fork版本修复的问题清单：
+## 新增unitType（px:%）属性
+
+* feat：unitType:String(px | %)控制属性的宽高、偏移单位可选为px、百分比,关闭原transform属性更改为left,top绝对定位
+
+## 针对原版本增加了宽高、偏移的百分比单位解析
+
+## 该fork版本修复的问题清单
+
 * fix：增加右键菜单事件contextmenu 2021-08-10
 * fix：开启自动对齐后，元素依据中线对齐可能会超出父容器边界的问题 2021-07-02
 * fix：取消选中的行为优先绑定在父节点上 2021-06-22
